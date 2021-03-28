@@ -118,6 +118,11 @@ public class GameManager : MonoBehaviour
         return gameStarted;
     }
 
+    public void SetGameStarted(bool value)
+    {
+        gameStarted = value;
+    }
+
     public int GetMoveX()
     {
         return MOVE_X;

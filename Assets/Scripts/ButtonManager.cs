@@ -101,6 +101,8 @@ public class ButtonManager : MonoBehaviour
 
     public void OptionsButton()
     {
+        gameManager.SetGameStarted(false);
+
         SoundManager.soundManager.PlaySound("Click", 1f);
 
         optionsMenu.SetActive(true);
@@ -109,6 +111,8 @@ public class ButtonManager : MonoBehaviour
 
     public void ResumeButton()
     {
+        gameManager.SetGameStarted(true);
+
         SoundManager.soundManager.PlaySound("Click", 1f);
 
         optionsMenu.SetActive(false);
