@@ -4,39 +4,37 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public const int MOVE_X = 550;
-
-    [Header("Menus & Gameplay")]
-    [SerializeField] private Button optionsButton;
-    [SerializeField] private GameObject mainMenu;
-    [SerializeField] private GameObject optionsMenu;
-    [SerializeField] private GameObject victoryMenu;
-    [SerializeField] private GameObject gameplay;
-    [SerializeField] private TextMeshProUGUI textMovesCounter;
-    [SerializeField] private TextMeshProUGUI textMovesTotal;
-    [SerializeField] private TextMeshProUGUI textTimeCounter;
-    [SerializeField] private TextMeshProUGUI textTimeTotal;
-    private int movesCounter;
-    private float timeCounter;
+    [Header("Settings")]
+    [SerializeField] private const int MOVE_X = 550;
+    [SerializeField] private const int MOVE_Y = 50;
 
     [Header("Pieces")]
-    //[SerializeField] private int amountPieces = 5;
-    [SerializeField] private GameObject yellowPiece;
-    [SerializeField] private GameObject bluePiece;
-    [SerializeField] private GameObject greenPiece;
-    [SerializeField] private GameObject redPiece;
-    [SerializeField] private GameObject fuchsiaPiece;
+    [SerializeField] private GameObject[] pieces;
+
+    [Header("Main Menu")]
+    [SerializeField] private GameObject mainMenu;
+
+    [Header("Options Menu")]
+    [SerializeField] private GameObject optionsMenu;
+
+    [Header("Victory Menu")]
+    [SerializeField] private GameObject victoryMenu;
+    [SerializeField] private TextMeshProUGUI textMovesTotal;
+    [SerializeField] private TextMeshProUGUI textTimeTotal;
+
+    [Header("Gameplay")]
+    [SerializeField] private GameObject gameplay;
+    [SerializeField] private TextMeshProUGUI textMovesCounter;
+    [SerializeField] private TextMeshProUGUI textTimeCounter;
+
+    private int movesCounter;
+    private float timeCounter;
 
     private StackFILO stackLeft;
     private StackFILO stackMiddle;
     private StackFILO stackRight;
 
-    private bool gameStarted;
-
-    private void Awake()
-    {
-        gameStarted = false;
-    }
+    private bool gameRunning;
 
     private void Start()
     {
@@ -48,54 +46,22 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (gameStarted)
+        if (gameRunning)
         {
             timeCounter += Time.deltaTime;
-            string msg = string.Format("{0:0.00}", timeCounter);
-            textTimeCounter.text = msg;
+            textTimeCounter.text = string.Format("{0:0.00}", timeCounter);
         }
     }
 
     public void Initialize()
     {
-        gameStarted = true;
+        gameRunning = true;
 
         movesCounter = 0;
         timeCounter = 0f;
-        textMovesCounter.text = movesCounter.ToString();
+        textMovesCounter.text = "0";
 
         InitializeStacks();
-    }
-
-    public void PeekStacks()
-    {
-        if (!stackLeft.IsEmpty())
-        {
-            var aux = stackLeft.Peek();
-            print("L: " + aux);
-        }
-        else
-        {
-            print("L: ");
-        }
-        if (!stackMiddle.IsEmpty())
-        {
-            var aux = stackMiddle.Peek();
-            print("M: " + aux);
-        }
-        else
-        {
-            print("M: ");
-        }
-        if (!stackRight.IsEmpty())
-        {
-            var aux = stackRight.Peek();
-            print("R: " + aux);
-        }
-        else
-        {
-            print("R: ");
-        }
     }
 
     public StackFILO GetStackLeft()
@@ -115,17 +81,22 @@ public class GameManager : MonoBehaviour
 
     public bool GetGameStarted()
     {
-        return gameStarted;
+        return gameRunning;
     }
 
-    public void SetGameStarted(bool value)
+    public void SetGameRunning(bool value)
     {
-        gameStarted = value;
+        gameRunning = value;
     }
 
     public int GetMoveX()
     {
         return MOVE_X;
+    }
+
+    public int GetMoveY()
+    {
+        return MOVE_Y;
     }
 
     public void IncreaseTurnCounter()
@@ -136,7 +107,7 @@ public class GameManager : MonoBehaviour
 
     public void CheckVictory()
     {
-        if (stackRight.GetIndexCount() == 5)
+        if (stackRight.GetIndexCount() == pieces.Length)
         {
             Victory();
         }
@@ -148,15 +119,14 @@ public class GameManager : MonoBehaviour
         stackMiddle = new StackFILO();
         stackRight = new StackFILO();
 
-        stackLeft.Initialize();
-        stackMiddle.Initialize();
-        stackRight.Initialize();
+        stackLeft.Initialize(pieces.Length);
+        stackMiddle.Initialize(pieces.Length);
+        stackRight.Initialize(pieces.Length);
 
-        InitialPosition(fuchsiaPiece);
-        InitialPosition(redPiece);
-        InitialPosition(greenPiece);
-        InitialPosition(bluePiece);
-        InitialPosition(yellowPiece);
+        for (int i = 0; i < pieces.Length; i++)
+        {
+            InitialPosition(pieces[i]);
+        }
     }
 
     private void InitialPosition(GameObject obj)
@@ -168,14 +138,14 @@ public class GameManager : MonoBehaviour
 
     private void Victory()
     {
-        gameStarted = false;
+        gameRunning = false;
 
-        SoundManager.soundManager.PlaySound("Endgame", 1f);
+        SoundManager.soundManager.PlayEndgame();
 
         gameplay.SetActive(false);
         victoryMenu.SetActive(true);
         textMovesTotal.text = $"With {movesCounter} moves";
-        string msg = string.Format("{0:0.00}", timeCounter);
+        var msg = string.Format("{0:0.00}", timeCounter);
         textTimeTotal.text = $"in {msg} seconds";
     }
 }

@@ -24,86 +24,67 @@ public class ButtonManager : MonoBehaviour
     private StackFILO stackMiddle;
     private StackFILO stackRight;
 
-    private void Update()
-    {
-        if (gameManager.GetGameStarted())
-        {
-            CheckTopItem();
-        }
-    }
-
     public void PlayButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
+        SoundManager.soundManager.PlayClick();
 
         mainMenu.SetActive(false);
         optionsMenu.SetActive(false);
         victoryMenu.SetActive(false);
-        gameManager.Initialize();
         gameplay.SetActive(true);
+
+        gameManager.Initialize();
 
         stackLeft = gameManager.GetStackLeft();
         stackMiddle = gameManager.GetStackMiddle();
         stackRight = gameManager.GetStackRight();
+
+        CheckTopItem();
     }
 
     public void LeftPillarRightButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
-
-        MovePosition(stackLeft, stackMiddle, 1);
-        gameManager.IncreaseTurnCounter();
+        MoveItem(stackLeft, stackMiddle, 1);
+        MoveButton();
     }
 
     public void LeftPillarDoubleRightButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
-
-        MovePosition(stackLeft, stackRight, 2);
-        gameManager.IncreaseTurnCounter();
-
+        MoveItem(stackLeft, stackRight, 2);
+        MoveButton();
         gameManager.CheckVictory();
     }
 
     public void MiddlePillarLeftButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
-
-        MovePosition(stackMiddle, stackLeft, -1);
-        gameManager.IncreaseTurnCounter();
+        MoveItem(stackMiddle, stackLeft, -1);
+        MoveButton();
     }
 
     public void MiddlePillarRightButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
-
-        MovePosition(stackMiddle, stackRight, 1);
-        gameManager.IncreaseTurnCounter();
+        MoveItem(stackMiddle, stackRight, 1);
+        MoveButton();
         gameManager.CheckVictory();
-
     }
 
     public void RightPillarLeftButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
-
-        MovePosition(stackRight, stackMiddle, -1);
-        gameManager.IncreaseTurnCounter();
+        MoveItem(stackRight, stackMiddle, -1);
+        MoveButton();
     }
 
     public void RightPillarDoubleLeftButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
-
-        MovePosition(stackRight, stackLeft, -2);
-        gameManager.IncreaseTurnCounter();
+        MoveItem(stackRight, stackLeft, -2);
+        MoveButton();
     }
 
     public void OptionsButton()
     {
-        gameManager.SetGameStarted(false);
+        gameManager.SetGameRunning(false);
 
-        SoundManager.soundManager.PlaySound("Click", 1f);
+        SoundManager.soundManager.PlayClick();
 
         optionsMenu.SetActive(true);
         gameplay.SetActive(false);
@@ -111,9 +92,9 @@ public class ButtonManager : MonoBehaviour
 
     public void ResumeButton()
     {
-        gameManager.SetGameStarted(true);
+        gameManager.SetGameRunning(true);
 
-        SoundManager.soundManager.PlaySound("Click", 1f);
+        SoundManager.soundManager.PlayClick();
 
         optionsMenu.SetActive(false);
         gameplay.SetActive(true);
@@ -121,16 +102,16 @@ public class ButtonManager : MonoBehaviour
 
     public void ExitButton()
     {
-        SoundManager.soundManager.PlaySound("Click", 1f);
+        SoundManager.soundManager.PlayClick();
 
         Invoke(nameof(ExitApp), 0.418f);
     }
 
     private void CheckTopItem()
     {
-        var itemLeftSize = stackLeft.Peek() != null ? stackLeft.Peek().gameObject.GetComponent<RectTransform>().sizeDelta.x : 0;
-        var itemMiddleSize = stackMiddle.Peek() != null ? stackMiddle.Peek().gameObject.GetComponent<RectTransform>().sizeDelta.x : 0;
-        var itemRightSize = stackRight.Peek() != null ? stackRight.Peek().gameObject.GetComponent<RectTransform>().sizeDelta.x : 0;
+        var itemLeftSize = stackLeft.IsEmpty() ? 0 : stackLeft.Peek().gameObject.GetComponent<RectTransform>().sizeDelta.x;
+        var itemMiddleSize = stackMiddle.IsEmpty() ? 0 : stackMiddle.Peek().gameObject.GetComponent<RectTransform>().sizeDelta.x;
+        var itemRightSize = stackRight.IsEmpty() ? 0: stackRight.Peek().gameObject.GetComponent<RectTransform>().sizeDelta.x;
         
         leftPillarRightButton.interactable = (((itemLeftSize < itemMiddleSize) || (itemMiddleSize == 0)) && itemLeftSize != 0);
         leftPillarDoubleRightButton.interactable = (((itemLeftSize < itemRightSize) || (itemRightSize == 0)) && itemLeftSize != 0);
@@ -140,13 +121,21 @@ public class ButtonManager : MonoBehaviour
         rightPillarLeftButton.interactable = (((itemRightSize < itemMiddleSize) || (itemMiddleSize == 0)) && itemRightSize != 0);
     }
 
-    private void MovePosition(StackFILO stackOrigin, StackFILO stackDestiny, int amountMovement)
+    private void MoveItem(StackFILO stackOrigin, StackFILO stackDestiny, int amountMovement)
     {
         var obj = stackOrigin.Pop();
         var rect = obj.GetComponent<RectTransform>();
-        var move = rect.anchoredPosition.x + (gameManager.GetMoveX() * amountMovement);
-        rect.anchoredPosition = new Vector3(move, stackDestiny.GetIndexCount() * 50, 0f);
+        var moveX = rect.anchoredPosition.x + (gameManager.GetMoveX() * amountMovement);
+        var moveY = stackDestiny.GetIndexCount() * gameManager.GetMoveY();
+        rect.anchoredPosition = new Vector3(moveX, moveY, 0f);
         stackDestiny.Push(obj);
+    }
+
+    private void MoveButton()
+    {
+        SoundManager.soundManager.PlayClick();
+        gameManager.IncreaseTurnCounter();
+        CheckTopItem();
     }
 
     private void ExitApp()

@@ -1,6 +1,6 @@
 public interface IStackFILO<Type>
 {
-    public void Initialize();
+    public void Initialize(int value);
 
     public void Push(Type item);
 

@@ -16,20 +16,17 @@ public class SoundManager : MonoBehaviour
         audioSourceSFX = gameObject.GetComponent<AudioSource>();
     }
 
-    public void PlaySound(string clip, float volumen)
+    public void PlayClick()
     {
-        switch (clip)
-        {
-            case "Click":
-                audioSourceSFX.clip = click;
-                audioSourceSFX.volume = volumen;
-                audioSourceSFX.Play();
-                break;
-            case "Endgame":
-                audioSourceSFX.clip = endgame;
-                audioSourceSFX.volume = volumen;
-                audioSourceSFX.Play();
-                break;
-        }
+        audioSourceSFX.clip = click;
+        audioSourceSFX.volume = 1f;
+        audioSourceSFX.Play();
+    }
+
+    public void PlayEndgame()
+    {
+        audioSourceSFX.clip = endgame;
+        audioSourceSFX.volume = 1f;
+        audioSourceSFX.Play();
     }
 }
